@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import kotlin.properties.Delegates
@@ -18,24 +19,21 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     private val DEFAULT_POS_X = 0
 
     private var WIDTH_OFFSET = 20f
-    private val HEIGHT_OFFSET = 50f
+    private var HEIGHT_OFFSET = 50f
+    private val HEIGHT_RATIO = 22f
 
     private val totalColumn = 20f
 
-    private val margin = 5f
+    private val margin = 10f
 
     init {
-        screenWidth = context.resources.displayMetrics.widthPixels.toFloat()
-        screenHeight = context.resources.displayMetrics.heightPixels.toFloat()
-
         paint.color = ContextCompat.getColor(context, R.color.teal_700)
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         WIDTH_OFFSET = (screenWidth - margin * totalColumn) / totalColumn
-
+        HEIGHT_OFFSET = screenHeight / HEIGHT_RATIO
         for (i in 0..totalColumn.toInt()) {
             drawSquare(canvas, i)
         }
@@ -52,5 +50,16 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
             rect.left += margin / 2f
         }
         canvas?.drawRect(rect, paint)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        screenWidth = w.toFloat()
+        screenHeight = h.toFloat()
+        logSize("onSizeChanged", screenWidth, screenHeight)
+    }
+
+    private fun logSize(tag: String, width: Float, height: Float) {
+        println("Debug: ${tag}: ${width} ${height}")
     }
 }
