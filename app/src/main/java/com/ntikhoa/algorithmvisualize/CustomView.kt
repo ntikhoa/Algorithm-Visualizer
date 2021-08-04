@@ -12,21 +12,21 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
     private var paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private var screenWidth by Delegates.notNull<Int>()
-    private var screenHeight by Delegates.notNull<Int>()
+    private var screenWidth by Delegates.notNull<Float>()
+    private var screenHeight by Delegates.notNull<Float>()
 
     private val DEFAULT_POS_X = 0
-    private var DEFAULT_WIDTH = 20f
 
-    private val HEIGHT_OFFSET = 50
+    private var WIDTH_OFFSET = 20f
+    private val HEIGHT_OFFSET = 50f
 
-    private val totalColumn = 20
+    private val totalColumn = 20f
 
-    private val margin = 10
+    private val margin = 5f
 
     init {
-        screenWidth = context.resources.displayMetrics.widthPixels
-        screenHeight = context.resources.displayMetrics.heightPixels
+        screenWidth = context.resources.displayMetrics.widthPixels.toFloat()
+        screenHeight = context.resources.displayMetrics.heightPixels.toFloat()
 
         paint.color = ContextCompat.getColor(context, R.color.teal_700)
     }
@@ -34,24 +34,23 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        DEFAULT_WIDTH = (screenWidth - margin * totalColumn) / 20f
+        WIDTH_OFFSET = (screenWidth - margin * totalColumn) / totalColumn
 
-        for (i in 0..totalColumn) {
+        for (i in 0..totalColumn.toInt()) {
             drawSquare(canvas, i)
         }
     }
 
     private fun drawSquare(canvas: Canvas?, index: Int) {
         val rect = RectF()
-        rect.bottom = screenHeight.toFloat()
-        rect.top = rect.bottom - (index + 1) * HEIGHT_OFFSET
-        rect.left = (DEFAULT_POS_X + index * (DEFAULT_WIDTH + margin))
-        rect.right = rect.left + DEFAULT_WIDTH
+        rect.bottom = screenHeight
+        rect.top = rect.bottom - (screenHeight - HEIGHT_OFFSET * (totalColumn - index))
+        rect.left = (DEFAULT_POS_X + index * (WIDTH_OFFSET + margin))
+        rect.right = rect.left + WIDTH_OFFSET
 
         if (index == 0) {
-            rect.left += margin / 2
+            rect.left += margin / 2f
         }
-
         canvas?.drawRect(rect, paint)
     }
 }
