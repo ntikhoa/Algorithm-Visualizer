@@ -13,5 +13,8 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val customView = findViewById<CustomView>(R.id.myCustomView)
+//        customView.setTotalSize(20)
     }
 }

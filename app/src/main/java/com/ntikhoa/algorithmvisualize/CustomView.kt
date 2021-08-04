@@ -4,37 +4,43 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
-import kotlin.properties.Delegates
 
 class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
 
     private var paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private var screenWidth by Delegates.notNull<Float>()
-    private var screenHeight by Delegates.notNull<Float>()
+    private var screenWidth = 0f
+    private var screenHeight = 0f
 
-    private val DEFAULT_POS_X = 0
+    private var firstColumnPos = 0f
 
-    private var WIDTH_OFFSET = 20f
-    private var HEIGHT_OFFSET = 50f
-    private val HEIGHT_RATIO = 22f
+    private var columnWidth = 20f
+    private var columnHeightRatio = 22f
+    private val HEIGHT_OFFSET
+        get() = screenHeight / columnHeightRatio
 
-    private val totalColumn = 20f
+    private var totalColumn = 20f
 
-    private val margin = 10f
+    private val MARGIN = 10f
 
-    init {
-        paint.color = ContextCompat.getColor(context, R.color.teal_700)
-    }
+    private val MAX_COLUMN_WIDTH = 100f
+    private var MAX_COLUMN = 104f
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        WIDTH_OFFSET = (screenWidth - margin * totalColumn) / totalColumn
-        HEIGHT_OFFSET = screenHeight / HEIGHT_RATIO
-        for (i in 0..totalColumn.toInt()) {
+        paint.color = ContextCompat.getColor(context, R.color.teal_700)
+
+        columnWidth = (screenWidth - MARGIN * totalColumn) / totalColumn
+
+        if (columnWidth > MAX_COLUMN_WIDTH) {
+            columnWidth = MAX_COLUMN_WIDTH
+        }
+        val totalWidth = columnWidth * totalColumn + MARGIN * (totalColumn - 1)
+        firstColumnPos = (screenWidth - totalWidth) / 2
+
+        for (i in 0..(totalColumn - 1).toInt()) {
             drawSquare(canvas, i)
         }
     }
@@ -43,12 +49,9 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         val rect = RectF()
         rect.bottom = screenHeight
         rect.top = rect.bottom - (screenHeight - HEIGHT_OFFSET * (totalColumn - index))
-        rect.left = (DEFAULT_POS_X + index * (WIDTH_OFFSET + margin))
-        rect.right = rect.left + WIDTH_OFFSET
+        rect.left = firstColumnPos + index * (columnWidth + MARGIN)
+        rect.right = rect.left + columnWidth
 
-        if (index == 0) {
-            rect.left += margin / 2f
-        }
         canvas?.drawRect(rect, paint)
     }
 
@@ -56,10 +59,21 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         super.onSizeChanged(w, h, oldw, oldh);
         screenWidth = w.toFloat()
         screenHeight = h.toFloat()
-        logSize("onSizeChanged", screenWidth, screenHeight)
     }
 
     private fun logSize(tag: String, width: Float, height: Float) {
         println("Debug: ${tag}: ${width} ${height}")
+    }
+
+    fun setTotalSize(totalSize: Int) {
+        if (totalSize < 0)
+            this.totalColumn = 0f
+        else if (totalSize > MAX_COLUMN) {
+            //TODO: add later
+        } else {
+            this.totalColumn = totalSize.toFloat()
+            columnHeightRatio = totalColumn + 2f
+        }
+        invalidate()
     }
 }
