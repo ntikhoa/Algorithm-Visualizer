@@ -15,6 +15,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val customView = findViewById<CustomView>(R.id.myCustomView)
-//        customView.setTotalSize(20)
+//        customView.setTotalSize(104)
     }
 }

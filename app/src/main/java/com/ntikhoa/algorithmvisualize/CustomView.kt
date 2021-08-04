@@ -16,39 +16,49 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
     private var firstColumnPos = 0f
 
-    private var columnWidth = 20f
-    private var columnHeightRatio = 22f
-    private val HEIGHT_OFFSET
-        get() = screenHeight / columnHeightRatio
-
     private var totalColumn = 20f
+    private var columnHeightRatio = 22f
+    private var columnWidth = 0f
+    private var heightWeight = 0f
 
     private val MARGIN = 10f
 
     private val MAX_COLUMN_WIDTH = 100f
-    private var MAX_COLUMN = 104f
+    private var MAX_COLUMN = 104f //TODO calculate max column
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         paint.color = ContextCompat.getColor(context, R.color.teal_700)
 
-        columnWidth = (screenWidth - MARGIN * totalColumn) / totalColumn
+        heightWeight = getColumnHeightWeight()
 
-        if (columnWidth > MAX_COLUMN_WIDTH) {
-            columnWidth = MAX_COLUMN_WIDTH
-        }
-        val totalWidth = columnWidth * totalColumn + MARGIN * (totalColumn - 1)
-        firstColumnPos = (screenWidth - totalWidth) / 2
+        columnWidth = getColumnWidth()
+
+        firstColumnPos = getFirstColumnPos()
 
         for (i in 0..(totalColumn - 1).toInt()) {
             drawSquare(canvas, i)
         }
     }
 
+    private fun getColumnHeightWeight(): Float = screenHeight / columnHeightRatio
+    private fun getColumnWidth(): Float {
+        var columnWidth = (screenWidth - MARGIN * totalColumn) / totalColumn
+        if (columnWidth > MAX_COLUMN_WIDTH) {
+            columnWidth = MAX_COLUMN_WIDTH
+        }
+        return columnWidth
+    }
+
+    private fun getFirstColumnPos(): Float {
+        val totalWidth = columnWidth * totalColumn + MARGIN * (totalColumn - 1)
+        return (screenWidth - totalWidth) / 2
+    }
+
     private fun drawSquare(canvas: Canvas?, index: Int) {
         val rect = RectF()
         rect.bottom = screenHeight
-        rect.top = rect.bottom - (screenHeight - HEIGHT_OFFSET * (totalColumn - index))
+        rect.top = rect.bottom - (screenHeight - heightWeight * (totalColumn - 1 - index))
         rect.left = firstColumnPos + index * (columnWidth + MARGIN)
         rect.right = rect.left + columnWidth
 
