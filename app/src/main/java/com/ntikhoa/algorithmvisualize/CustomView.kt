@@ -9,46 +9,66 @@ import androidx.core.content.ContextCompat
 
 class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
 
+    private var setSizeCalled = false
+
+    private var DEFAULT_COLUMN = 20
+    private val MARGIN = 10f
+    private val MIN_WIDTH = 10f
+
+
     private var paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var screenWidth = 0f
     private var screenHeight = 0f
 
+    private var maxColumn = 0
+
     private var firstColumnPos = 0f
 
-    private var totalColumn = 20f
-    private var columnHeightRatio = 22f
+    private var totalColumn = DEFAULT_COLUMN
     private var columnWidth = 0f
     private var heightWeight = 0f
-
-    private val MARGIN = 10f
-
-    private val MAX_COLUMN_WIDTH = 100f
-    private var MAX_COLUMN = 104f //TODO calculate max column
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         paint.color = ContextCompat.getColor(context, R.color.teal_700)
 
-        heightWeight = getColumnHeightWeight()
+        calculateAttribute()
 
-        columnWidth = getColumnWidth()
-
-        firstColumnPos = getFirstColumnPos()
-
-        for (i in 0..(totalColumn - 1).toInt()) {
+        for (i in 0 until totalColumn) {
             drawSquare(canvas, i)
         }
     }
 
-    private fun getColumnHeightWeight(): Float = screenHeight / columnHeightRatio
-    private fun getColumnWidth(): Float {
-        var columnWidth = (screenWidth - MARGIN * totalColumn) / totalColumn
-        if (columnWidth > MAX_COLUMN_WIDTH) {
-            columnWidth = MAX_COLUMN_WIDTH
+    private fun calculateAttribute() {
+        screenWidth = width.toFloat()
+        screenHeight = height.toFloat()
+
+        maxColumn = getMaxColumn()
+
+        totalColumn = if (maxColumn < DEFAULT_COLUMN) {
+            maxColumn
+        } else DEFAULT_COLUMN
+
+        if (setSizeCalled) {
+            applyTotalSize()
         }
-        return columnWidth
+
+        heightWeight = getColumnHeightWeight()
+        calColWidthAndFirstPos()
     }
+
+    private fun getColumnHeightWeight(): Float {
+        val columnHeightRatio = totalColumn + 2
+        return screenHeight / columnHeightRatio
+    }
+
+    private fun calColWidthAndFirstPos() {
+        columnWidth = getColumnWidth()
+        firstColumnPos = getFirstColumnPos()
+    }
+
+    private fun getColumnWidth(): Float = (screenWidth - MARGIN * totalColumn) / totalColumn
 
     private fun getFirstColumnPos(): Float {
         val totalWidth = columnWidth * totalColumn + MARGIN * (totalColumn - 1)
@@ -65,25 +85,23 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         canvas?.drawRect(rect, paint)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        screenWidth = w.toFloat()
-        screenHeight = h.toFloat()
+    private fun getMaxColumn(): Int {
+        return ((screenWidth + MARGIN) / (MIN_WIDTH + MARGIN)).toInt()
     }
 
-    private fun logSize(tag: String, width: Float, height: Float) {
-        println("Debug: ${tag}: ${width} ${height}")
-    }
+    private var userSize = 0
 
     fun setTotalSize(totalSize: Int) {
-        if (totalSize < 0)
-            this.totalColumn = 0f
-        else if (totalSize > MAX_COLUMN) {
-            //TODO: add later
-        } else {
-            this.totalColumn = totalSize.toFloat()
-            columnHeightRatio = totalColumn + 2f
-        }
-        invalidate()
+        setSizeCalled = true
+        this.userSize = totalSize
+        requestLayout()
+    }
+
+    private fun applyTotalSize() {
+        if (userSize < 0)
+            this.totalColumn = 0
+        else if (userSize > maxColumn) {
+            totalColumn = maxColumn
+        } else totalColumn = userSize
     }
 }
