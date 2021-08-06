@@ -16,5 +16,17 @@ class MainActivity : AppCompatActivity() {
 
         val customView = findViewById<CustomView>(R.id.myCustomView)
 //        customView.setTotalSize(10)
+        customView.setOnSortListener(object: CustomView.OnSortListener {
+            override suspend fun onSort(array: List<Int>) {
+                for (i in 0 until array.size) {
+                    for (j in i + 1 until array.size) {
+                        if (array[j] < array[i]) {
+                            customView.swap(i, j);
+                        }
+                    }
+                }
+            }
+        })
+//        customView.startSort()
     }
 }

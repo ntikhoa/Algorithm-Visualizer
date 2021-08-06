@@ -6,10 +6,14 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
+import android.view.MotionEvent
+import kotlinx.coroutines.*
+
 
 class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
 
     private var setSizeCalled = false
+    private var getRandomValueCalled = false
 
     private var DEFAULT_COLUMN = 20
     private val MARGIN = 10f
@@ -29,14 +33,21 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     private var columnWidth = 0f
     private var heightWeight = 0f
 
+    private var listener: OnSortListener? = null
+
+    private lateinit var randomValues: ArrayList<Int>
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         paint.color = ContextCompat.getColor(context, R.color.teal_700)
 
         calculateAttribute()
 
+        if (!getRandomValueCalled) {
+            randomValues = getRandomValue()
+        }
         for (i in 0 until totalColumn) {
-            drawSquare(canvas, i)
+            drawSquare(canvas, i, randomValues[i])
         }
     }
 
@@ -75,10 +86,10 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         return (screenWidth - totalWidth) / 2
     }
 
-    private fun drawSquare(canvas: Canvas?, index: Int) {
+    private fun drawSquare(canvas: Canvas?, index: Int, value: Int) {
         val rect = RectF()
         rect.bottom = screenHeight
-        rect.top = rect.bottom - (screenHeight - heightWeight * (totalColumn - 1 - index))
+        rect.top = rect.bottom - (screenHeight - heightWeight * (totalColumn - 1 - value))
         rect.left = firstColumnPos + index * (columnWidth + MARGIN)
         rect.right = rect.left + columnWidth
 
@@ -103,5 +114,68 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         else if (userSize > maxColumn) {
             totalColumn = maxColumn
         } else totalColumn = userSize
+    }
+
+    private fun getRandomValue(): ArrayList<Int> {
+        getRandomValueCalled = true
+        val list = (0 until totalColumn).toMutableList()
+        list.shuffle()
+        return ArrayList(list)
+    }
+
+    suspend fun swap(firstIndex: Int, secondIndex: Int) {
+        withContext(Dispatchers.Main) {
+            val temp = randomValues[firstIndex]
+            randomValues[firstIndex] = randomValues[secondIndex]
+            randomValues[secondIndex] = temp
+            invalidate()
+            delay(100)
+        }
+    }
+
+    fun setOnSortListener(listener: OnSortListener) {
+        this.listener = listener
+    }
+
+//    fun startSort() {
+//        performClick()
+//        invalidate()
+//    }
+
+    private var downTouch = false
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        super.onTouchEvent(event)
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+//                invalidate()
+//                listener?.onSort(randomValues)
+                downTouch = true
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                if (downTouch) {
+                    downTouch = false
+                    performClick()
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private var onSortCalled = false
+
+    override fun performClick(): Boolean {
+        onSortCalled = true
+        CoroutineScope(Dispatchers.Main).launch {
+            listener?.onSort(randomValues)
+        }
+        return true
+    }
+
+
+    interface OnSortListener {
+        suspend fun onSort(array: List<Int>)
     }
 }
