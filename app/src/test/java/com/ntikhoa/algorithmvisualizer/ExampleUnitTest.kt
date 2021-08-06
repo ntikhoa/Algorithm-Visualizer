@@ -1,4 +1,4 @@
-package com.ntikhoa.algorithmvisualize
+package com.ntikhoa.algorithmvisualizer
 
 import org.junit.Test
 

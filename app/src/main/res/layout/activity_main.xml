@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.ntikhoa.algorithmvisualize.CustomView
+    <com.ntikhoa.algorithmvisualizer.CustomView
         android:id="@+id/myCustomView"
-        android:layout_width="500dp"
-        android:layout_height="200dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:background="@color/white" />
 

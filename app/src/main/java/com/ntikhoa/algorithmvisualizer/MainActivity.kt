@@ -1,4 +1,4 @@
-package com.ntikhoa.algorithmvisualize
+package com.ntikhoa.algorithmvisualizer
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,6 +15,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val customView = findViewById<CustomView>(R.id.myCustomView)
-        customView.setTotalSize(10)
+//        customView.setTotalSize(10)
     }
 }
