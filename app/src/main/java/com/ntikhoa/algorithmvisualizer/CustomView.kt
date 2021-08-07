@@ -149,7 +149,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         highlightedFirst = firstIndex
         highlightedSecond = secondIndex
         invalidate()
-        delay(100)
+        delay(20)
     }
 
     private suspend fun onSwap(firstIndex: Int, secondIndex: Int) {
@@ -163,7 +163,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     private suspend fun onEndSwap(firstIndex: Int, secondIndex: Int) {
         onEndSwap = true
         invalidate()
-        delay(100)
+        delay(20)
         onEndSwap = false
     }
 
@@ -183,7 +183,10 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
             MotionEvent.ACTION_UP -> {
                 if (downTouch) {
                     downTouch = false
-                    performClick()
+                    if (!onSortCalled) {
+                        println("performClick Called")
+                        performClick()
+                    }
                     return true
                 }
             }
@@ -194,11 +197,23 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     override fun performClick(): Boolean {
         onSortCalled = true
         CoroutineScope(Dispatchers.Main).launch {
-            listener?.onSort(randomValues)
+            if (!checkIfSorted()) {
+                println("Sorting")
+                listener?.onSort(randomValues)
+            }
+            println("Sorted")
+            onSortCalled = false
         }
         return true
     }
 
+    private fun checkIfSorted(): Boolean {
+        for (i in 0 until randomValues.size - 1) {
+            if (randomValues[i] > randomValues[i + 1])
+                return false
+        }
+        return true
+    }
 
     interface OnSortListener {
         suspend fun onSort(array: List<Int>)
