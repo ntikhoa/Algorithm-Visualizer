@@ -14,6 +14,8 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
     private var setSizeCalled = false
     private var getRandomValueCalled = false
+    private var onSortCalled = false
+    private var onEndSwap = false
 
     private var DEFAULT_COLUMN = 20
     private val MARGIN = 10f
@@ -21,6 +23,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
 
     private var paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var highLightedPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var screenWidth = 0f
     private var screenHeight = 0f
@@ -37,9 +40,16 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
     private lateinit var randomValues: ArrayList<Int>
 
+    private var highlightedFirst = -1
+    private var highlightedSecond = -1
+
+    init {
+        paint.color = ContextCompat.getColor(context, R.color.teal_700)
+        highLightedPaint.color = Color.RED
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        paint.color = ContextCompat.getColor(context, R.color.teal_700)
 
         calculateAttribute()
 
@@ -93,7 +103,11 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         rect.left = firstColumnPos + index * (columnWidth + MARGIN)
         rect.right = rect.left + columnWidth
 
-        canvas?.drawRect(rect, paint)
+        if (!onEndSwap) {
+            if (index == highlightedFirst || index == highlightedSecond)
+                canvas?.drawRect(rect, highLightedPaint)
+            else canvas?.drawRect(rect, paint)
+        } else canvas?.drawRect(rect, paint)
     }
 
     private fun getMaxColumn(): Int {
@@ -125,22 +139,37 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
     suspend fun swap(firstIndex: Int, secondIndex: Int) {
         withContext(Dispatchers.Main) {
-            val temp = randomValues[firstIndex]
-            randomValues[firstIndex] = randomValues[secondIndex]
-            randomValues[secondIndex] = temp
-            invalidate()
-            delay(100)
+            onStartSwap(firstIndex, secondIndex)
+            onSwap(firstIndex, secondIndex)
+            onEndSwap(firstIndex, secondIndex)
         }
+    }
+
+    private suspend fun onStartSwap(firstIndex: Int, secondIndex: Int) {
+        highlightedFirst = firstIndex
+        highlightedSecond = secondIndex
+        invalidate()
+        delay(100)
+    }
+
+    private suspend fun onSwap(firstIndex: Int, secondIndex: Int) {
+        val temp = randomValues[firstIndex]
+        randomValues[firstIndex] = randomValues[secondIndex]
+        randomValues[secondIndex] = temp
+        invalidate()
+        delay(100)
+    }
+
+    private suspend fun onEndSwap(firstIndex: Int, secondIndex: Int) {
+        onEndSwap = true
+        invalidate()
+        delay(100)
+        onEndSwap = false
     }
 
     fun setOnSortListener(listener: OnSortListener) {
         this.listener = listener
     }
-
-//    fun startSort() {
-//        performClick()
-//        invalidate()
-//    }
 
     private var downTouch = false
 
@@ -148,8 +177,6 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         super.onTouchEvent(event)
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
-//                invalidate()
-//                listener?.onSort(randomValues)
                 downTouch = true
                 return true
             }
@@ -163,8 +190,6 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         }
         return false
     }
-
-    private var onSortCalled = false
 
     override fun performClick(): Boolean {
         onSortCalled = true
