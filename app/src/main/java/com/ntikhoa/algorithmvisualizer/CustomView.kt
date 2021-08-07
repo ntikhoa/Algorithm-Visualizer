@@ -48,10 +48,13 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         highLightedPaint.color = Color.RED
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        calculateAttribute()
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
-        calculateAttribute()
 
         if (!getRandomValueCalled) {
             randomValues = getRandomValue()
@@ -77,6 +80,10 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
 
         heightWeight = getColumnHeightWeight()
         calColWidthAndFirstPos()
+    }
+
+    private fun getMaxColumn(): Int {
+        return ((screenWidth + MARGIN) / (MIN_WIDTH + MARGIN)).toInt()
     }
 
     private fun getColumnHeightWeight(): Float {
@@ -108,10 +115,6 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
                 canvas?.drawRect(rect, highLightedPaint)
             else canvas?.drawRect(rect, paint)
         } else canvas?.drawRect(rect, paint)
-    }
-
-    private fun getMaxColumn(): Int {
-        return ((screenWidth + MARGIN) / (MIN_WIDTH + MARGIN)).toInt()
     }
 
     private var userSize = 0
