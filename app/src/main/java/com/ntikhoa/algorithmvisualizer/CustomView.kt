@@ -218,6 +218,21 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         return true
     }
 
+    fun startSort() {
+        if (!onSortCalled) {
+            println("performClick Called")
+            onSortCalled = true
+            CoroutineScope(Dispatchers.Main).launch {
+                if (!checkIfSorted()) {
+                    println("Sorting")
+                    listener?.onSort(randomValues)
+                }
+                println("Sorted")
+                onSortCalled = false
+            }
+        }
+    }
+
     interface OnSortListener {
         suspend fun onSort(array: List<Int>)
     }
