@@ -7,11 +7,12 @@ import android.view.View
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import android.view.MotionEvent
-import android.view.ViewTreeObserver
 import kotlinx.coroutines.*
 
 
 class SortView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
 
     private var setSizeCalled = false
     private var getRandomValueCalled = false
@@ -178,26 +179,43 @@ class SortView(context: Context, @Nullable attrs: AttributeSet) : View(context, 
     }
 
     override fun performClick(): Boolean {
-        startSort()
+        start()
         return true
     }
 
-    fun startSort() {
+    fun start() {
         if (!onSortCalled) {
             println("performClick Called")
             onSortCalled = true
-            CoroutineScope(Dispatchers.Main).launch {
-                if (!checkIfSorted()) {
-                    println("Sorting")
-                    listener?.onSort(randomValues)
+            coroutineScope.launch {
+                try {
+                    if (!checkIfSorted()) {
+                        println("Sorting")
+                        listener?.onSort(randomValues)
+                        highlightedFirst = -1
+                        highlightedSecond = -1
+                        invalidate()
+                    }
+                    println("Sorted")
+                    onSortCalled = false
+                } catch(e: CancellationException) {
                     highlightedFirst = -1
                     highlightedSecond = -1
                     invalidate()
                 }
-                println("Sorted")
-                onSortCalled = false
             }
         }
+    }
+
+    fun cancel() {
+        coroutineScope.coroutineContext.cancelChildren()
+    }
+
+    fun reset() {
+        cancel()
+        getRandomValueCalled = false
+        onSortCalled = false
+        invalidate()
     }
 
     fun setTotalSize(totalSize: Int) {
