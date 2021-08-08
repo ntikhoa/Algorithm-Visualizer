@@ -18,27 +18,29 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        val customView = findViewById<CustomView>(R.id.myCustomView)
-        customView.setOnSortListener(object : CustomView.OnSortListener {
+        val sortView = findViewById<SortView>(R.id.myCustomView)
+        sortView.setOnSortListener(object : SortView.OnSortListener {
             override suspend fun onSort(array: List<Int>) {
+//                sortView.swap(0, 1)
                 for (i in 0 until array.size) {
                     for (j in i + 1 until array.size) {
                         if (array[j] < array[i]) {
-                            customView.swap(i, j)
+                            sortView.swap(i, j)
                         }
                     }
                 }
             }
         })
+//        sortView.setTotalSize(Int.MAX_VALUE)
 
-        //Another way to use custom view
+        //Another way to call custom view
 //        Handler(mainLooper).postDelayed({
-//            customView.startSort()
+//            sortView.startSort()
 //        }, 1000)
 //
 //        val button = findViewById<Button>(R.id.btnSort)
 //        button.setOnClickListener {
-//            customView.startSort()
+//            sortView.startSort()
 //        }
     }
 }

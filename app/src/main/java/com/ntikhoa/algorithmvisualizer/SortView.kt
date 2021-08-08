@@ -7,15 +7,16 @@ import android.view.View
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import android.view.MotionEvent
+import android.view.ViewTreeObserver
 import kotlinx.coroutines.*
 
 
-class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
+class SortView(context: Context, @Nullable attrs: AttributeSet) : View(context, attrs) {
 
     private var setSizeCalled = false
     private var getRandomValueCalled = false
     private var onSortCalled = false
-    private var onEndSwap = false
+    private var downTouch = false
 
     private var DEFAULT_COLUMN = 20
     private val MARGIN = 10f
@@ -110,20 +111,12 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         rect.left = firstColumnPos + index * (columnWidth + MARGIN)
         rect.right = rect.left + columnWidth
 
-        if (!onEndSwap) {
-            if (index == highlightedFirst || index == highlightedSecond)
-                canvas?.drawRect(rect, highLightedPaint)
-            else canvas?.drawRect(rect, paint)
-        } else canvas?.drawRect(rect, paint)
+        if (index == highlightedFirst || index == highlightedSecond)
+            canvas?.drawRect(rect, highLightedPaint)
+        else canvas?.drawRect(rect, paint)
     }
 
     private var userSize = 0
-
-    fun setTotalSize(totalSize: Int) {
-        setSizeCalled = true
-        this.userSize = totalSize
-        requestLayout()
-    }
 
     private fun applyTotalSize() {
         if (userSize < 0)
@@ -144,7 +137,6 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         withContext(Dispatchers.Main) {
             onStartSwap(firstIndex, secondIndex)
             onSwap(firstIndex, secondIndex)
-            onEndSwap(firstIndex, secondIndex)
         }
     }
 
@@ -152,7 +144,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         highlightedFirst = firstIndex
         highlightedSecond = secondIndex
         invalidate()
-        delay(20)
+        delay(10)
     }
 
     private suspend fun onSwap(firstIndex: Int, secondIndex: Int) {
@@ -163,18 +155,9 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
         delay(100)
     }
 
-    private suspend fun onEndSwap(firstIndex: Int, secondIndex: Int) {
-        onEndSwap = true
-        invalidate()
-        delay(20)
-        onEndSwap = false
-    }
-
     fun setOnSortListener(listener: OnSortListener) {
         this.listener = listener
     }
-
-    private var downTouch = false
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         super.onTouchEvent(event)
@@ -186,10 +169,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
             MotionEvent.ACTION_UP -> {
                 if (downTouch) {
                     downTouch = false
-                    if (!onSortCalled) {
-                        println("performClick Called")
-                        performClick()
-                    }
+                    performClick()
                     return true
                 }
             }
@@ -198,23 +178,7 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
     }
 
     override fun performClick(): Boolean {
-        onSortCalled = true
-        CoroutineScope(Dispatchers.Main).launch {
-            if (!checkIfSorted()) {
-                println("Sorting")
-                listener?.onSort(randomValues)
-            }
-            println("Sorted")
-            onSortCalled = false
-        }
-        return true
-    }
-
-    private fun checkIfSorted(): Boolean {
-        for (i in 0 until randomValues.size - 1) {
-            if (randomValues[i] > randomValues[i + 1])
-                return false
-        }
+        startSort()
         return true
     }
 
@@ -226,11 +190,28 @@ class CustomView(context: Context, @Nullable attrs: AttributeSet) : View(context
                 if (!checkIfSorted()) {
                     println("Sorting")
                     listener?.onSort(randomValues)
+                    highlightedFirst = -1
+                    highlightedSecond = -1
+                    invalidate()
                 }
                 println("Sorted")
                 onSortCalled = false
             }
         }
+    }
+
+    fun setTotalSize(totalSize: Int) {
+        setSizeCalled = true
+        this.userSize = totalSize
+        requestLayout()
+    }
+
+    private fun checkIfSorted(): Boolean {
+        for (i in 0 until randomValues.size - 1) {
+            if (randomValues[i] > randomValues[i + 1])
+                return false
+        }
+        return true
     }
 
     interface OnSortListener {
