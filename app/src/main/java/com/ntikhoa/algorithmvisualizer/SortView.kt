@@ -55,6 +55,11 @@ class SortView(context: Context, @Nullable attrs: AttributeSet) : View(context, 
         calculateAttribute()
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        calculateAttribute()
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 

@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Algorithm Visualizer</string>
+
+    <array name="sorting_algo_list">
+        <item>Bubble Sort</item>
+        <item>Insertion Sort</item>
+        <item>Selection Sort</item>
+        <item>Quick Sort</item>
+        <item>Heap Sort</item>
+    </array>
 </resources>

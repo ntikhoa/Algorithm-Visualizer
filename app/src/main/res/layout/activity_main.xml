@@ -8,11 +8,11 @@
     tools:context=".MainActivity">
 
     <com.ntikhoa.algorithmvisualizer.SortView
-        android:id="@+id/myCustomView"
+        android:id="@+id/sortView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
-        android:background="@color/white" />
+        android:background="@color/black" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -36,6 +36,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Reset" />
+
+        <Spinner
+            android:id="@+id/sortSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown" />
+
+        <EditText
+            android:id="@+id/etTotalSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:hint="Total Size"
+            android:inputType="number"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="5dp" />
 
     </LinearLayout>
 
