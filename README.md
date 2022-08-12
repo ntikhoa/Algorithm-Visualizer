@@ -54,4 +54,4 @@ Note that the setTotalSize method is only apply when you call the reset method o
 setTotalSize(Integer.MAX_VALUE)
 ```
 # Preview
-![](Preview/demo.png)
+![](Preview/demo1.png)
