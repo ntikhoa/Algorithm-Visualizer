@@ -2,11 +2,10 @@
 Demo link: https://youtu.be/aV2xouxZJtk
 # Introduction
 Algorithm Visualizer is an app for visualizing sorting algorithm. 
-You can use the SortView widget in the source code to implement your own sorting algorithm.
-This app visualizes sorting algorithm only. I am planing on impletemting PathFindingView widget for visualizaing path finding algorithm.
+You can use the SortView widget in the source code to visuallizing your own sorting algorithm.
 # Technique uses
 * Kotlin
-* Custom View
+* Experiment with Custom View
 * Coroutines
 # How does it work
 
@@ -54,3 +53,5 @@ Note that the setTotalSize method is only apply when you call the reset method o
 ```
 setTotalSize(Integer.MAX_VALUE)
 ```
+# Preview
+![](Preview/demo.png)
