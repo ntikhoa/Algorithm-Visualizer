@@ -5,8 +5,8 @@ Algorithm Visualizer is an app for visualizing sorting algorithm.
 You can use the SortView widget in the source code to visuallizing your own sorting algorithm.
 # Technique uses
 * Kotlin
-* Experiment with Custom View
-* Coroutines
+* Custom View and Animation
+* Coroutine
 # How does it work
 
 ### Implement your own sorting algorithm
@@ -53,5 +53,8 @@ Note that the setTotalSize method is only apply when you call the reset method o
 ```
 setTotalSize(Integer.MAX_VALUE)
 ```
-# Preview
+# Weeknesses
+* Custom View is still in experimental stage
+* Does not represent the true relative speed of algorithms
+# Portfolio
 ![](Preview/demo1.png)
